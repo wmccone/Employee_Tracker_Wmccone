@@ -2,7 +2,7 @@ const mysql = require('mysql');
 const inquirer = require('inquirer')
 require('dotenv').config();
 
-
+//Creates the connection to the database
 const connection = mysql.createConnection({
   host: 'localhost',
 
@@ -16,10 +16,19 @@ const connection = mysql.createConnection({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
 });
+
+//Going to take the Users input and apply an action depending on what they select
 const taskOperation = (data) => {
   switch (data.databasetask) {
     case 'View all employees':
-
+      connection.query('SELECT id, first_name, last_name FROM employee', (err, res) => {
+        res.forEach(({id, first_name, last_name})=> {
+          //Placeholder for table
+          console.log(`ID: ${id}|| Full Name: ${first_name} ${last_name}`)
+        })
+      
+      })
+      dataBaseQuestion()
       break;
     case 'View all employees by department':
 
@@ -59,6 +68,8 @@ const taskOperation = (data) => {
       break;
   }
 }
+
+//Going to query the user on which action they would like to take in the employee directory application
 const dataBaseQuestion = () => {
 
   inquirer.
@@ -90,7 +101,7 @@ const dataBaseQuestion = () => {
       taskOperation(data)
     })
 }
-
+// Going to initialize the application
 const runDataBase = () => {
   dataBaseQuestion()
 }

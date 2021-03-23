@@ -26,9 +26,8 @@ const taskOperation = (data) => {
           //Placeholder for table
           console.log(`ID: ${id}|| Full Name: ${first_name} ${last_name}`)
         })
-      
-      })
-      dataBaseQuestion()
+      });
+      dataBaseQuestion();
       break;
     case 'View all employees by department':
 
@@ -46,7 +45,13 @@ const taskOperation = (data) => {
 
       break;
     case 'View departments':
-
+      connection.query('SELECT id, name FROM department', (err, res) => {
+        res.forEach(({id, name})=> {
+          //Placeholder for table
+          console.log(`ID: ${id}|| Name: ${name}`)
+        })
+      });
+      dataBaseQuestion();
       break;
     case 'Add a department':
 
@@ -55,7 +60,13 @@ const taskOperation = (data) => {
 
       break;
     case 'View Roles':
-
+      connection.query('SELECT id, name FROM role', (err, res) => {
+        res.forEach(({id, title, salary})=> {
+          //Placeholder for table
+          console.log(`ID: ${id}|| Title: ${title}|| Salary: ${salary}`)
+        })
+      });
+      dataBaseQuestion();
       break;
     case 'Add a role':
 

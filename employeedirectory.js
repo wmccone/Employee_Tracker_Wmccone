@@ -6,8 +6,8 @@ require('dotenv').config();
 const connection = mysql.createConnection({
   host: 'localhost',
 
-  // Your port; if not 3301
-  port: 3001,
+  // Your port; if not 3306
+  port: 3306,
 
   // Your username
   user: process.env.DB_USER,
@@ -36,7 +36,45 @@ const taskOperation = (data) => {
 
       break;
     case 'Add Employee':
-
+      inquirer.prompt([
+        {
+          name: 'firstName',
+          type: 'input',
+          message: 'What is the employees first name?'
+        },
+        {
+          name: 'lastName',
+          type: 'input',
+          message: 'What is the employees last name?'
+        },
+        //placeholder for role logic and database query
+        {
+          name: 'roleId',
+          type: 'input',
+          message: 'What is the employees role ID?'
+        },
+        //placeholder for manager logic and database query
+        {
+          name: 'managerId',
+          type: 'input',
+          message: 'What is the employees managers ID?'
+        }
+      ])
+      .then((data)=>{
+        connection.query('INSERT INTO employee SET ?',
+        {
+          first_name: data.firstName,
+          last_name: data.lastName,
+          role_id: data.roleId,
+          manager_id: data.managerId
+        },
+        (err, res) => {
+          if (err) throw err;
+          console.log(`${res.affectedRows} employee inserted!\n`);
+          // Call updateProduct AFTER the INSERT completes
+          dataBaseQuestion()
+      })
+    })
       break;
     case 'Update an employees role':
 
@@ -59,7 +97,7 @@ const taskOperation = (data) => {
     case 'Remove a department':
 
       break;
-    case 'View Roles':
+    case 'View roles':
       connection.query('SELECT id, name FROM role', (err, res) => {
         res.forEach(({id, title, salary})=> {
           //Placeholder for table
@@ -100,7 +138,7 @@ const dataBaseQuestion = () => {
           'View departments',
           'Add a department',
           'Remove a department',
-          'View Roles',
+          'View roles',
           'Add a role',
           'Remove a role',
           'Exit Application'

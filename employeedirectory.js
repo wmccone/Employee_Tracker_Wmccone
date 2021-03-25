@@ -68,12 +68,25 @@ const taskOperation = (data) => {
       });
       dataBaseQuestion();
       break;
+
     case 'View all employees by department':
+      let query =
+      'SELECT employee.id, employee.first_name, employee.last_name ,role.id ,role.title, department.id, department.name';
+      query+=
+      'FROM employee INNER JOIN role ON (employee.role_id = role.id) INNER JOIN department ON (role.department_id = department.id)';
+
+      connection.query(query,[results.department],(err,res) => {
+        res.forEach(({first_name, last_name, role, department})=> {
+          console.log(`Department: ${department} || Role: ${role} || Full Name: ${first_name} ${last_name}`)
+        })
+        dataBaseQuestion();
+      })
 
       break;
     case 'View all employees by manager':
 
       break;
+
     case 'Add Employee':
       inquirer.prompt([
         {
@@ -115,6 +128,7 @@ const taskOperation = (data) => {
             });
         })
       break;
+
     case 'Update an employees role':
       //Going to ask the questions regarding the employee to change and the role to update to
       inquirer
@@ -169,9 +183,11 @@ const taskOperation = (data) => {
         });
 
       break;
+
     case 'Update an employee manager':
 
       break;
+
     case 'View departments':
       connection.query('SELECT id, name FROM department', (err, res) => {
         res.forEach(({ id, name }) => {
@@ -181,6 +197,7 @@ const taskOperation = (data) => {
       });
       dataBaseQuestion();
       break;
+  
     case 'Add a department':
       inquirer.prompt([
         {
@@ -202,6 +219,7 @@ const taskOperation = (data) => {
             });
         })
       break;
+
     case 'Remove a department':
       inquirer.prompt([
         {
@@ -235,6 +253,7 @@ const taskOperation = (data) => {
           )
         })
       break;
+
     case 'View roles':
       connection.query('SELECT id, title, salary FROM role', (err, res) => {
         res.forEach(({ id, title, salary }) => {
@@ -244,6 +263,7 @@ const taskOperation = (data) => {
       });
       dataBaseQuestion();
       break;
+
     case 'Add a role':
       inquirer.prompt([
         {
@@ -278,6 +298,7 @@ const taskOperation = (data) => {
             });
         })
       break;
+
     case 'Remove a role':
       inquirer.prompt([
         {

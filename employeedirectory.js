@@ -17,12 +17,51 @@ const connection = mysql.createConnection({
   database: process.env.DB_NAME,
 });
 
+const selectEmployees = () => {
+  connection.query('SELECT id, first_name, last_name FROM employee', (err, res) => {
+    if (err) {
+      console.log(err)
+    }
+    else {
+      return res
+    }
+  })
+};
+
+const selectRoles = () => {
+  connection.query('SELECT id, title, salary FROM role', (err, res) => {
+    if (err) {
+      console.log(err)
+    }
+    else {
+      return res
+    }
+  })
+};
+
+
+const selectDepartment = () => {
+  connection.query('SELECT id, name FROM department', (err, res) => {
+    if (err) {
+      console.log(err)
+    }
+    else {
+      return res
+    }
+  })
+};
+
+
+
+
+
+
 //Going to take the Users input and apply an action depending on what they select
 const taskOperation = (data) => {
   switch (data.databasetask) {
     case 'View all employees':
       connection.query('SELECT id, first_name, last_name FROM employee', (err, res) => {
-        res.forEach(({id, first_name, last_name})=> {
+        res.forEach(({ id, first_name, last_name }) => {
           //Placeholder for table
           console.log(`ID: ${id}|| Full Name: ${first_name} ${last_name}`)
         })
@@ -60,23 +99,74 @@ const taskOperation = (data) => {
           message: 'What is the employees managers ID?'
         }
       ])
-      .then((data)=>{
-        connection.query('INSERT INTO employee SET ?',
-        {
-          first_name: data.firstName,
-          last_name: data.lastName,
-          role_id: data.roleId,
-          manager_id: data.managerId
-        },
-        (err, res) => {
-          if (err) throw err;
-          console.log(`${res.affectedRows} employee inserted!\n`);
-          // Call updateProduct AFTER the INSERT completes
-          dataBaseQuestion()
-      })
-    })
+        .then((data) => {
+          connection.query('INSERT INTO employee SET ?',
+            {
+              first_name: data.firstName,
+              last_name: data.lastName,
+              role_id: data.roleId,
+              manager_id: data.managerId
+            },
+            (err, res) => {
+              if (err) throw err;
+              console.log(`${res.affectedRows} employee inserted!\n`);
+              // Call updateProduct AFTER the INSERT completes
+              dataBaseQuestion()
+            });
+        })
       break;
     case 'Update an employees role':
+      //Going to ask the questions regarding the employee to change and the role to update to
+      inquirer
+        .prompt([
+          {
+            name: 'employee',
+            type: 'rawlist',
+            choices() {
+              //Creates the choice array
+              const choiceArray = []
+              //pulls the employees from the employee table
+              selectEmployees()
+                //populates the employee information into the array
+                .then(results.forEach(({ employee }) => {
+                  choiceArray.push(employee);
+                })
+                )
+            },
+            message: 'Which employee would you like to update?'
+          },
+          {
+            name: 'newRole',
+            type: 'rawlist',
+            choices() {
+              //Creates the choice array
+              const choiceArray = []
+              //pulls the roles from the role table
+              selectRoles()
+                //populates the roles into the choice array
+                .then(results.forEach(({ role }) => {
+                  choiceArray.push(role);
+                })
+                )
+            },
+            message: 'Which role would you like to switch the employee to?'
+          },
+        ])
+
+        .then((results) => {
+          //going to update the employee role ID on the employee page
+          connection.query('UPDATE employee SET ? WHERE?',
+            [
+              { role_id: results.newRole.id },
+              { id: results.employee.id }
+            ],
+            (error) => {
+              if (error) throw err;
+              console.log('Employees role updated successfully!');
+              dataBaseQuestion();
+            }
+          );
+        });
 
       break;
     case 'Update an employee manager':
@@ -84,7 +174,7 @@ const taskOperation = (data) => {
       break;
     case 'View departments':
       connection.query('SELECT id, name FROM department', (err, res) => {
-        res.forEach(({id, name})=> {
+        res.forEach(({ id, name }) => {
           //Placeholder for table
           console.log(`ID: ${id}|| Name: ${name}`)
         })
@@ -92,14 +182,62 @@ const taskOperation = (data) => {
       dataBaseQuestion();
       break;
     case 'Add a department':
-
+      inquirer.prompt([
+        {
+          name: 'department',
+          type: 'input',
+          message: 'What is the departments name?'
+        },
+      ])
+        .then((data) => {
+          connection.query('INSERT INTO department SET ?',
+            {
+              name: data.department,
+            },
+            (err, res) => {
+              if (err) throw err;
+              console.log(`${res.affectedRows} department inserted!\n`);
+              // Call updateProduct AFTER the INSERT completes
+              dataBaseQuestion()
+            });
+        })
       break;
     case 'Remove a department':
-
+      inquirer.prompt([
+        {
+          name: 'department',
+          type: 'rawlist',
+          choices() {
+            //Creates the choice array
+            const choiceArray = []
+            //pulls the departments from the department table
+            selectDepartment()
+              //populates the departments into the choice array
+              .then(results.forEach(({ department }) => {
+                choiceArray.push(department);
+              })
+              )
+          },
+          message: 'Which department would you like to remove?'
+        }
+      ])
+        .then((results) => {
+          connection.query('DELETE FROM department WHERE ?',
+            {
+              name: results.department
+            },
+            (err, res) => {
+              if (err) throw err;
+              console.log(`${res.affectedRows} department deleted!\n`);
+              // Call dataBaseQuestion AFTER the DELETE completes
+              dataBaseQuestion();
+            }
+          )
+        })
       break;
     case 'View roles':
-      connection.query('SELECT id, name FROM role', (err, res) => {
-        res.forEach(({id, title, salary})=> {
+      connection.query('SELECT id, title, salary FROM role', (err, res) => {
+        res.forEach(({ id, title, salary }) => {
           //Placeholder for table
           console.log(`ID: ${id}|| Title: ${title}|| Salary: ${salary}`)
         })
@@ -107,9 +245,71 @@ const taskOperation = (data) => {
       dataBaseQuestion();
       break;
     case 'Add a role':
-
+      inquirer.prompt([
+        {
+          name: 'title',
+          type: 'input',
+          message: 'What is the roles title?'
+        },
+        {
+          name: 'salary',
+          type: 'input',
+          message: 'What is the roles salary?'
+        },
+        //placeholder for department logic and database query
+        {
+          name: 'roleId',
+          type: 'input',
+          message: 'What is the roles department?'
+        }
+      ])
+        .then((data) => {
+          connection.query('INSERT INTO role SET ?',
+            {
+              title: data.firstName,
+              salary: data.lastName,
+              role_id: data.roleId,
+            },
+            (err, res) => {
+              if (err) throw err;
+              console.log(`${res.affectedRows} role inserted!\n`);
+              // Call updateProduct AFTER the INSERT completes
+              dataBaseQuestion()
+            });
+        })
       break;
     case 'Remove a role':
+      inquirer.prompt([
+        {
+          name: 'role',
+          type: 'rawlist',
+          choices() {
+            //Creates the choice array
+            const choiceArray = []
+            //pulls the roles from the role table
+            selectRoles()
+              //populates the roles into the choice array
+              .then(results.forEach(({ role }) => {
+                choiceArray.push(role);
+              })
+              )
+          },
+          message: 'Which role would you like to remove?'
+        }
+      ])
+        .then((results) => {
+          connection.query('DELETE FROM role WHERE ?',
+            {
+              title: results.role
+            },
+            (err, res) => {
+              if (err) throw err;
+              console.log(`${res.affectedRows} role deleted!\n`);
+              // Call dataBaseQuestion AFTER the DELETE completes
+              dataBaseQuestion();
+            }
+          )
+        })
 
       break;
     default:

@@ -41,14 +41,24 @@ const selectRoles = () => {
 
 
 const selectDepartment = () => {
-  connection.query('SELECT id, name FROM department', (err, res) => {
+  const choiceArray = [];
+  connection.query('SELECT * FROM department', (err, res) => {
     if (err) {
       console.log(err)
     }
-    else {
+    else{
+      // console.log()
+      // // for(let i=0;i<res.length;i++){
+      // //   choiceArray.push(res.name.toString());
+      // // }
+      // // console.log(Object.values(res))
+      // res.forEach(({ name }) => {
+      // //   choiceArray.push(name);
+      // })
       return res
     }
   })
+  // return choiceArray
 };
 
 
@@ -70,17 +80,42 @@ const taskOperation = (data) => {
       break;
 
     case 'View all employees by department':
-      let query =
-      'SELECT employee.id, employee.first_name, employee.last_name ,role.id ,role.title, department.id, department.name';
-      query+=
-      'FROM employee INNER JOIN role ON (employee.role_id = role.id) INNER JOIN department ON (role.department_id = department.id)';
+      let query = 'SELECT employee.id, employee.first_name, employee.last_name ,role.id ,role.title, department.id, department.name';
+      query += 'FROM employee INNER JOIN role ON (employee.role_id = role.id) INNER JOIN department ON (role.department_id = department.id)';
 
-      connection.query(query,[results.department],(err,res) => {
-        res.forEach(({first_name, last_name, role, department})=> {
-          console.log(`Department: ${department} || Role: ${role} || Full Name: ${first_name} ${last_name}`)
-        })
-        dataBaseQuestion();
-      })
+      inquirer.prompt([
+        {
+          name: 'department',
+          type: 'rawlist',
+          choices() {
+            const choiceArray = []
+            selectDepartment().forEach(({ name }) => {
+              choiceArray.push(name);
+            }
+            )
+            return choiceArray;
+            //Creates the choice array
+            //pulls the departments from the department table
+              //populates the departments into the choice array
+              // .then(res.forEach(({ department }) => {
+              //   choiceArray.push(department);
+              // })
+              // )
+            },
+          message: 'Which department would you like to view?'
+        }
+      ])
+
+        .then((results) => {
+          connection.query(query, [results.department], (err, res) => {
+            console.log(res)
+            res.forEach(({ first_name, last_name, role, department }) => {
+              console.log(`Department: ${department} || Role: ${role} || Full Name: ${first_name} ${last_name}`)
+            })
+            dataBaseQuestion();
+          })
+        }
+        )
 
       break;
     case 'View all employees by manager':
@@ -135,7 +170,7 @@ const taskOperation = (data) => {
         .prompt([
           {
             name: 'employee',
-            type: 'rawlist',
+            type: 'list',
             choices() {
               //Creates the choice array
               const choiceArray = []
@@ -151,7 +186,7 @@ const taskOperation = (data) => {
           },
           {
             name: 'newRole',
-            type: 'rawlist',
+            type: 'list',
             choices() {
               //Creates the choice array
               const choiceArray = []
@@ -197,7 +232,7 @@ const taskOperation = (data) => {
       });
       dataBaseQuestion();
       break;
-  
+
     case 'Add a department':
       inquirer.prompt([
         {
@@ -224,15 +259,15 @@ const taskOperation = (data) => {
       inquirer.prompt([
         {
           name: 'department',
-          type: 'rawlist',
+          type: 'list',
           choices() {
             //Creates the choice array
             const choiceArray = []
             //pulls the departments from the department table
             selectDepartment()
               //populates the departments into the choice array
-              .then(results.forEach(({ department }) => {
-                choiceArray.push(department);
+              .then(results.forEach(({ name }) => {
+                choiceArray.push(name);
               })
               )
           },
@@ -278,7 +313,7 @@ const taskOperation = (data) => {
         },
         //placeholder for department logic and database query
         {
-          name: 'roleId',
+          name: 'departmentId',
           type: 'input',
           message: 'What is the roles department?'
         }
@@ -286,9 +321,9 @@ const taskOperation = (data) => {
         .then((data) => {
           connection.query('INSERT INTO role SET ?',
             {
-              title: data.firstName,
-              salary: data.lastName,
-              role_id: data.roleId,
+              title: data.title,
+              salary: data.salary,
+              department_id: data.departmentId,
             },
             (err, res) => {
               if (err) throw err;
@@ -310,10 +345,11 @@ const taskOperation = (data) => {
             //pulls the roles from the role table
             selectRoles()
               //populates the roles into the choice array
-              .then(results.forEach(({ role }) => {
-                choiceArray.push(role);
+              .then(results.forEach(({ title }) => {
+                choiceArray.push(title);
               })
               )
+              return choiceArray
           },
           message: 'Which role would you like to remove?'
         }

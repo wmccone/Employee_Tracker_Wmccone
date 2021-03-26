@@ -1,6 +1,7 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer')
 require('dotenv').config();
+const cTable = require('console.table');
 
 //Creates the connection to the database
 const connection = mysql.createConnection({
@@ -47,18 +48,18 @@ const selectDepartment = () => {
       console.log(err)
     }
     else{
-      // console.log()
+      console.log(res)
       // // for(let i=0;i<res.length;i++){
       // //   choiceArray.push(res.name.toString());
       // // }
-      // // console.log(Object.values(res))
-      // res.forEach(({ name }) => {
-      // //   choiceArray.push(name);
-      // })
-      return res
+     
+      res.forEach(({ name }) => {
+        choiceArray.push(name);
+      })
+      // return res
     }
   })
-  // return choiceArray
+  return choiceArray
 };
 
 
@@ -71,10 +72,8 @@ const taskOperation = (data) => {
   switch (data.databasetask) {
     case 'View all employees':
       connection.query('SELECT id, first_name, last_name FROM employee', (err, res) => {
-        res.forEach(({ id, first_name, last_name }) => {
-          //Placeholder for table
-          console.log(`ID: ${id}|| Full Name: ${first_name} ${last_name}`)
-        })
+        console.log('Printing Employee Table')
+        console.table(res)
       });
       dataBaseQuestion();
       break;
@@ -89,10 +88,8 @@ const taskOperation = (data) => {
           type: 'rawlist',
           choices() {
             const choiceArray = []
-            selectDepartment().forEach(({ name }) => {
-              choiceArray.push(name);
-            }
-            )
+            selectDepartment()
+            console.log(choiceArray)
             return choiceArray;
             //Creates the choice array
             //pulls the departments from the department table
@@ -108,10 +105,11 @@ const taskOperation = (data) => {
 
         .then((results) => {
           connection.query(query, [results.department], (err, res) => {
-            console.log(res)
-            res.forEach(({ first_name, last_name, role, department }) => {
-              console.log(`Department: ${department} || Role: ${role} || Full Name: ${first_name} ${last_name}`)
-            })
+            console.log('Printing table to console')
+            console.table(res)
+            // res.forEach(({ first_name, last_name, role, department }) => {
+            //   console.log(`Department: ${department} || Role: ${role} || Full Name: ${first_name} ${last_name}`)
+            // })
             dataBaseQuestion();
           })
         }
@@ -225,10 +223,12 @@ const taskOperation = (data) => {
 
     case 'View departments':
       connection.query('SELECT id, name FROM department', (err, res) => {
-        res.forEach(({ id, name }) => {
-          //Placeholder for table
-          console.log(`ID: ${id}|| Name: ${name}`)
-        })
+        console.log('Printing roles to console')
+        console.table(res)
+        // res.forEach(({ id, name }) => {
+        //   //Placeholder for table
+        //   console.log(`ID: ${id}|| Name: ${name}`)
+        // })
       });
       dataBaseQuestion();
       break;
@@ -291,10 +291,12 @@ const taskOperation = (data) => {
 
     case 'View roles':
       connection.query('SELECT id, title, salary FROM role', (err, res) => {
-        res.forEach(({ id, title, salary }) => {
-          //Placeholder for table
-          console.log(`ID: ${id}|| Title: ${title}|| Salary: ${salary}`)
-        })
+        console.log('Printing roles to console')
+        console.table(res)
+        // res.forEach(({ id, title, salary }) => {
+        //   //Placeholder for table
+        //   console.log(`ID: ${id}|| Title: ${title}|| Salary: ${salary}`)
+        // })
       });
       dataBaseQuestion();
       break;

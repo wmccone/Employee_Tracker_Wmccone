@@ -24,7 +24,21 @@
 
   ## Usage
 
-  Once you run the app you will then be presented with a series of options: View all employees, view employees by department, view departments, view roles, add employee, add department, add role, update employee role, remove employee, remove department, and remove role. Once you are finished updating records you can choose exit application to end the application.
+  Once you run the app you will then be presented with a series of options:
+
+  * View all employees: Allows you to view all employees in the organization.
+  * View employees by department: Allows you to view employees in a specific department.
+  * Add employee: Allows you to add a new employee to the organization.
+  * Update employee role: This will allow you to change an employees role.
+  * Remove employee: This will allow you to remove an employee.
+  * View departments: Allows you to view all departments.
+  * Add department: Allows you to add a new department to the organization.
+  * Remove department: This will allow you to remove a department.
+  * View roles: Allows you to view all roles.
+  * Add role: Allows you to add a new role to the organization.
+  * Remove role: This will allow you to remove a role
+
+  Once you are finished updating records you can choose exit application to end the application.
 
   ## License
 

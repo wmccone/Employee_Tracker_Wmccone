@@ -122,11 +122,17 @@ const taskOperation = (data) => {
           .then((results) => {
             console.clear()
             connection.query(query, [results.department], (err, res) => {
+              if (res.length < 1){
+                console.log("There are no employees for this department yet! Add one below")
+                dataBaseQuestion();
+              }
+              else{
               // Going to push the department data into a table
               console.log(`Here are the employees in ${results.department}`)
               console.table(res)
               //Return to the main prompt
               dataBaseQuestion();
+              }
             })
           }
           )
@@ -482,6 +488,40 @@ const taskOperation = (data) => {
 //Going to query the user on which action they would like to take in the employee directory application
 const dataBaseQuestion = () => {
 
+  // console.clear()
+  console.log('Welcome to the Employee Directory')
+  inquirer.
+  prompt([
+    {
+      name: 'databasetask',
+      type: 'list',
+      message: 'What would you like to do?',
+      choices: [
+        'View all employees',
+        'View all employees by department',
+        'Add Employee',
+        'Remove employee',
+        'Update an employees role',
+        'View departments',
+        'Add a department',
+        'Remove a department',
+        'View roles',
+        'Add a role',
+        'Remove a role',
+        'Exit Application'
+      ]
+    },
+  ])
+  
+  .then((data) => {
+    taskOperation(data)
+  })
+}
+// Going to initialize the application
+
+connection.connect((err) => {
+  if (err) throw err;
+  // run the start function after the connection is made to prompt the user
   figlet('Employee Tracker', function(err, data) {
       if (err) {
           console.log('Something went wrong...');
@@ -490,39 +530,5 @@ const dataBaseQuestion = () => {
       }
       console.log(data)
     });
-  // console.clear()
-  console.log('Welcome to the Employee Directory')
-  inquirer.
-    prompt([
-      {
-        name: 'databasetask',
-        type: 'list',
-        message: 'What would you like to do?',
-        choices: [
-          'View all employees',
-          'View all employees by department',
-          'Add Employee',
-          'Remove employee',
-          'Update an employees role',
-          'View departments',
-          'Add a department',
-          'Remove a department',
-          'View roles',
-          'Add a role',
-          'Remove a role',
-          'Exit Application'
-        ]
-      },
-    ])
-
-    .then((data) => {
-      taskOperation(data)
-    })
-}
-// Going to initialize the application
-
-connection.connect((err) => {
-  if (err) throw err;
-  // run the start function after the connection is made to prompt the user
   dataBaseQuestion();
 });

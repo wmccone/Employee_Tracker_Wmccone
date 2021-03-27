@@ -11,11 +11,12 @@ const connection = mysql.createConnection({
   // Your port; if not 3306
   port: 3306,
 
-  // Your username
+  // Your username should be pulling from your .env file
   user: process.env.DB_USER,
 
-  // Your password
+  // Your password should be pulling from your .env file
   password: process.env.DB_PASSWORD,
+  // the database name should already be prepopulated in the .env file if you used the template attached
   database: process.env.DB_NAME,
 });
 
@@ -29,8 +30,11 @@ const selectEmployees = () => {
     }
   })
 };
+
+//This is going to create a global roles variable that the select roles function will push to
 let roles;
 
+//This function will be used for the update role function to query the databse for role records
 const selectRoles = () => {
   return connection.query('SELECT id, title, salary FROM role', (err, res) => {
     if (err) {

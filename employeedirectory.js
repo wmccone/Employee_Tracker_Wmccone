@@ -74,25 +74,36 @@ const selectDepartment = () => {
 
 //Going to take the Users input and apply an action depending on what they select
 const taskOperation = (data) => {
-  //
+
+  // This switch function will give the user 11 functions and 1 default that will exit the application
   switch (data.databasetask) {
-    //If the user chooses to view all employees the app will list all employees in the database
+
+    // 1) If the user chooses to view all employees the app will list all employees in the database
     case 'View all employees':
+      //clear the console to make the CLI read better
       console.clear()
+      //Going to query the ID and name from the employee table
       connection.query('SELECT id, first_name, last_name FROM employee', (err, res) => {
+        // This is going to add the data into a table for the user
         console.log('Here are the employees in your organization')
         console.table(res)
+        //Return to the main prompt
         dataBaseQuestion();
       });
       break;
 
+    // 2) If the user chooses to view employees by department they will be able to select the department they want to view.
     case 'View all employees by department':
+      //clear the console to make the CLI read better
       console.clear()
+      // This query will provide department data for the inquirer question below
       connection.query('SELECT * FROM department', (err, results) => {
         if (err) throw err;
+        // This is the query that will be called once we have the department selected. It wil pull data from all three tables (Department, Role, and Employee)
         let query = 'SELECT department.name, role.title, employee.first_name, employee.last_name ';
         query += 'FROM department INNER JOIN role ON (department.id = role.department_id) INNER JOIN employee ON (employee.role_id = role.id)';
         query += 'WHERE department.name = ?'
+        //Lists all the departments that are avialable in the database
         inquirer.prompt([
           {
             name: 'department',
@@ -103,32 +114,29 @@ const taskOperation = (data) => {
                 choiceArray.push(name);
               });
               return choiceArray;
-
             },
             message: 'Which department would you like to view?'
           }
         ])
-
+          // Once the User selects the department they would like to view, we will pull the query we wrote earlier to populate the data for the user.
           .then((results) => {
             console.clear()
             connection.query(query, [results.department], (err, res) => {
+              // Going to push the department data into a table
               console.log(`Here are the employees in ${results.department}`)
               console.table(res)
-              // res.forEach(({ first_name, last_name, role, department }) => {
-              //   console.log(`Department: ${department} || Role: ${role} || Full Name: ${first_name} ${last_name}`)
-              // })
+              //Return to the main prompt
               dataBaseQuestion();
             })
           }
           )
       })
       break;
-    case 'View all employees by manager':
 
-      break;
-
+    // 3) This case will allow the user to add an employee.
     case 'Add Employee':
       console.clear()
+      // this query is going to allow us to populate the available roles to the inquirer question below.
       connection.query('SELECT * FROM role', (err, results) => {
         if (err) throw err;
         inquirer.prompt([
@@ -142,10 +150,10 @@ const taskOperation = (data) => {
             type: 'input',
             message: 'What is the employees last name?'
           },
-          //placeholder for role logic and database query
           {
             name: 'role',
             type: 'list',
+            // This is going to populate available roles for the user to select from.
             choices() {
               const choiceArray = [];
               results.forEach(({ id, title }) => {
@@ -155,11 +163,12 @@ const taskOperation = (data) => {
             },
             message: 'What is the employees role ID?'
           }
- 
+
         ])
           .then((data) => {
+            // This array will store the role ID and the role name that the user had selected. We will use the ID later with roleARR[0]
             const roleArr = data.role.split(' ')
-
+            //We are going to insert the new employees name and role ID into the employee table
             connection.query('INSERT INTO employee SET ?',
               {
                 first_name: data.firstName,
@@ -169,23 +178,26 @@ const taskOperation = (data) => {
               (err, res) => {
                 if (err) throw err;
                 console.log(`${res.affectedRows} employee inserted!\n`);
-                // Call updateProduct AFTER the INSERT completes
+                //Return to the main prompt
                 dataBaseQuestion()
               });
           })
       })
       break;
 
+    // 4) This case is going to allow the user to update the role for a current employee, we will use the earlier function selectRoles in this function.
     case 'Update an employees role':
+      //This is going to clear the console for the user to clean up the console.
       console.clear()
+      //This query is going to allow us to select content from both the employee and role tables
       let query = 'SELECT role.title, role.id, employee.id, employee.first_name, employee.last_name, employee.role_id ';
       query += 'FROM role INNER JOIN employee ON (employee.role_id = role.id)';
       connection.query(query, async (err, results) => {
         if (err) throw err;
-        //Going to ask the questions regarding the employee to change and the role to update to
-        // const roles = await selectRoles()
+
+        //We are going to call the select roles after we have started the previous query to make sure we have all the data available.
         await selectRoles()
-        console.log(roles)
+        //Going to ask the questions regarding the employee to change and the role to update to
         inquirer
           .prompt([
             {
@@ -195,11 +207,10 @@ const taskOperation = (data) => {
                 //Creates the choice array
                 const choiceArray = []
                 //pulls the employees from the employee table
-                //populates the employee information into the array
                 results.forEach(({ id, first_name, last_name }) => {
                   choiceArray.push(`${id} ${first_name} ${last_name}`);
                 })
-
+                //populates the employee information into the array
                 return choiceArray
 
               },
@@ -212,12 +223,10 @@ const taskOperation = (data) => {
                 //Creates the choice array
                 const choiceArray = []
                 //pulls the roles from the role table
-
-                //populates the roles into the choice array
                 roles.forEach(({ id, title }) => {
                   choiceArray.push(`${id} ${title}`);
                 })
-
+                //populates the roles into the choice array
                 return choiceArray
               },
               message: 'Which role would you like to switch the employee to?'
@@ -225,11 +234,12 @@ const taskOperation = (data) => {
           ])
 
           .then((data) => {
+            //This is going to allow us to split the employee ID and name into an array we will use the employee ID(employeeARR[0]) later
             const employeeArr = data.employee.split(' ')
+            //This is going to allow us to split the role ID and name into an array we will use the role ID(roleARR[0]) later
             const roleArr = data.newRole.split(' ')
             //going to update the employee role ID on the employee page
             connection.query('UPDATE employee SET ? WHERE?',
-
               [
                 { role_id: roleArr[0] },
                 { id: employeeArr[0] }
@@ -237,6 +247,7 @@ const taskOperation = (data) => {
               (error) => {
                 if (error) throw err;
                 console.log('Employees role updated successfully!');
+                //Return to the main prompt
                 dataBaseQuestion();
               }
             );
@@ -244,8 +255,10 @@ const taskOperation = (data) => {
       })
       break;
 
-    case 'Remove employee'  :
+    // 5) This case will allow us to remove employees
+    case 'Remove employee':
       console.clear()
+      //This will allow us to select all employees from the database
       connection.query('SELECT * FROM employee', (err, results) => {
         if (err) throw err;
         inquirer.prompt([
@@ -266,7 +279,9 @@ const taskOperation = (data) => {
           }
         ])
           .then((data) => {
+            //This is going to allow us to split the employee ID and name into an array we will use the employee ID(employeeARR[0]) later
             const employeeArr = data.employee.split(' ')
+            // This is going to use the employee ID to remove the employee from the table
             connection.query('DELETE FROM employee WHERE ?',
               {
                 id: employeeArr[0]
@@ -274,13 +289,16 @@ const taskOperation = (data) => {
               (err, res) => {
                 if (err) throw err;
                 console.log(`${res.affectedRows} employee deleted!\n`);
-                // Call dataBaseQuestion AFTER the DELETE completes
+
+                //Return to the main prompt
                 dataBaseQuestion();
               }
             )
           })
       })
       break;
+
+    // 6) This case will allow us to view departments in a table
     case 'View departments':
       console.clear()
       connection.query('SELECT id, name FROM department', (err, res) => {
@@ -290,6 +308,7 @@ const taskOperation = (data) => {
       });
       break;
 
+    // 7) This case will allow us to add a department to the database.
     case 'Add a department':
       inquirer.prompt([
         {
@@ -299,6 +318,7 @@ const taskOperation = (data) => {
         },
       ])
         .then((data) => {
+          //Going to populate the department name into the table
           connection.query('INSERT INTO department SET ?',
             {
               name: data.department,
@@ -306,12 +326,13 @@ const taskOperation = (data) => {
             (err, res) => {
               if (err) throw err;
               console.log(`${res.affectedRows} department inserted!\n`);
-              // Call updateProduct AFTER the INSERT completes
+              //Return to the main prompt
               dataBaseQuestion()
             });
         })
       break;
 
+    // 8) This case will allow us to remove departments
     case 'Remove a department':
       console.clear()
       connection.query('SELECT * FROM department', (err, results) => {
@@ -333,6 +354,7 @@ const taskOperation = (data) => {
           }
         ])
           .then((results) => {
+            //This is going to remove the selected department from the table
             connection.query('DELETE FROM department WHERE ?',
               {
                 name: results.department
@@ -340,7 +362,7 @@ const taskOperation = (data) => {
               (err, res) => {
                 if (err) throw err;
                 console.log(`${res.affectedRows} department deleted!\n`);
-                // Call dataBaseQuestion AFTER the DELETE completes
+                //Return to the main prompt
                 dataBaseQuestion();
               }
             )
@@ -348,8 +370,10 @@ const taskOperation = (data) => {
       })
       break;
 
+    // 9) This case will allow us to view roles in a table
     case 'View roles':
       console.clear()
+      // This query is going to pull data from the role table and populate it into a table
       connection.query('SELECT id, title, salary FROM role', (err, res) => {
         console.log('Here are the roles for your organization')
         console.table(res)
@@ -357,57 +381,62 @@ const taskOperation = (data) => {
       });
       break;
 
+    // 10) This case will allow us to add a role to the database.
     case 'Add a role':
       console.clear()
+      // This is going to query data from the department table to populate into the question below
       connection.query('SELECT * FROM department', (err, results) => {
         if (err) throw err;
-      inquirer.prompt([
-        {
-          name: 'title',
-          type: 'input',
-          message: 'What is the roles title?'
-        },
-        {
-          name: 'salary',
-          type: 'input',
-          message: 'What is the roles salary?'
-        },
-        //placeholder for department logic and database query
-        {
-          name: 'department',
-          type: 'list',
-          choices(){
-            //Creates the choice array
-            const choiceArray = []
-            //pulls the departments from the department table
-            results.forEach(({ id, name }) => {
-              choiceArray.push(`${id} ${name}`);
-            });
-            return choiceArray;
+        inquirer.prompt([
+          {
+            name: 'title',
+            type: 'input',
+            message: 'What is the roles title?'
           },
-          message: 'What is the roles department?'
-        }
-      ])
-        .then((data) => {
-          const departmentArr = data.department.split(' ')
-          connection.query('INSERT INTO role SET ?',
-            {
-              title: data.title,
-              salary: data.salary,
-              department_id: departmentArr[0],
+          {
+            name: 'salary',
+            type: 'input',
+            message: 'What is the roles salary?'
+          },
+          {
+            name: 'department',
+            type: 'list',
+            choices() {
+              //Creates the choice array
+              const choiceArray = []
+              //pulls the departments from the department table
+              results.forEach(({ id, name }) => {
+                choiceArray.push(`${id} ${name}`);
+              });
+              return choiceArray;
             },
-            (err, res) => {
-              if (err) throw err;
-              console.log(`${res.affectedRows} role inserted!\n`);
-              // Call updateProduct AFTER the INSERT completes
-              dataBaseQuestion()
-            });
-        })
+            message: 'What is the roles department?'
+          }
+        ])
+          .then((data) => {
+            //This is going to split the department ID and the name into an array, we will use the ID (departmentArr[0]) below.
+            const departmentArr = data.department.split(' ')
+            // Inserts the title, salary, and Id into the table
+            connection.query('INSERT INTO role SET ?',
+              {
+                title: data.title,
+                salary: data.salary,
+                department_id: departmentArr[0],
+              },
+              (err, res) => {
+                if (err) throw err;
+                console.log(`${res.affectedRows} role inserted!\n`);
+                //Return to the main prompt
+                dataBaseQuestion()
+              });
+          })
       });
       break;
 
+    // 11) This case will allow us to remove roles
     case 'Remove a role':
       console.clear()
+      //This will allow us to query the data from role to use in the question below
       connection.query('SELECT * FROM role', (err, results) => {
         if (err) throw err;
         inquirer.prompt([
@@ -417,17 +446,17 @@ const taskOperation = (data) => {
             choices() {
               //Creates the choice array
               const choiceArray = []
-              //populates the roles into the choice array
               results.forEach(({ title }) => {
                 choiceArray.push(title);
               })
-
+              //populates the roles into the choice array
               return choiceArray
             },
             message: 'Which role would you like to remove?'
           }
         ])
           .then((results) => {
+            //This query will delete the role from the table
             connection.query('DELETE FROM role WHERE ?',
               {
                 title: results.role
@@ -435,13 +464,15 @@ const taskOperation = (data) => {
               (err, res) => {
                 if (err) throw err;
                 console.log(`${res.affectedRows} role deleted!\n`);
-                // Call dataBaseQuestion AFTER the DELETE completes
+                //Return to the main prompt
                 dataBaseQuestion();
               }
             )
           })
       })
       break;
+
+    // 12) Ends the connection if Exit application is selected
     default:
       connection.end()
       break;
@@ -450,47 +481,47 @@ const taskOperation = (data) => {
 
 //Going to query the user on which action they would like to take in the employee directory application
 const dataBaseQuestion = () => {
-  
-  // figlet('Employee Tracker', function(err, data) {
-  //     if (err) {
-  //         console.log('Something went wrong...');
-  //         console.dir(err);
-  //         return;
-  //     }
-  //     console.log(data)
-  //   });
+
+  figlet('Employee Tracker', function(err, data) {
+      if (err) {
+          console.log('Something went wrong...');
+          console.dir(err);
+          return;
+      }
+      console.log(data)
+    });
   // console.clear()
   console.log('Welcome to the Employee Directory')
   inquirer.
-  prompt([
-    {
-      name: 'databasetask',
-      type: 'list',
-      message: 'What would you like to do?',
-      choices: [
-        'View all employees',
-        'View all employees by department',
-        'Add Employee',
-        'Remove employee',
-        'Update an employees role',
-        'View departments',
-        'Add a department',
-        'Remove a department',
-        'View roles',
-        'Add a role',
-        'Remove a role',
-        'Exit Application'
-      ]
-    },
-  ])
-  
-  .then((data) => {
-    taskOperation(data)
-  })
+    prompt([
+      {
+        name: 'databasetask',
+        type: 'list',
+        message: 'What would you like to do?',
+        choices: [
+          'View all employees',
+          'View all employees by department',
+          'Add Employee',
+          'Remove employee',
+          'Update an employees role',
+          'View departments',
+          'Add a department',
+          'Remove a department',
+          'View roles',
+          'Add a role',
+          'Remove a role',
+          'Exit Application'
+        ]
+      },
+    ])
+
+    .then((data) => {
+      taskOperation(data)
+    })
 }
 // Going to initialize the application
 
-connection.connect ((err) => {
+connection.connect((err) => {
   if (err) throw err;
   // run the start function after the connection is made to prompt the user
   dataBaseQuestion();

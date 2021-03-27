@@ -35,7 +35,7 @@ const selectRoles = () => {
     if (err) {
       console.log(err)
     }
-    else{
+    else {
       roles = res
     }
   })
@@ -47,12 +47,12 @@ const selectDepartment = () => {
     if (err) {
       console.log(err)
     }
-    else{
+    else {
       console.log(res)
       // // for(let i=0;i<res.length;i++){
       // //   choiceArray.push(res.name.toString());
       // // }
-     
+
       res.forEach(({ name }) => {
         choiceArray.push(name);
       })
@@ -81,36 +81,36 @@ const taskOperation = (data) => {
     case 'View all employees by department':
       connection.query('SELECT * FROM department', (err, results) => {
         if (err) throw err;
-      let query = 'SELECT department.name, role.title, employee.first_name, employee.last_name ';
-      query += 'FROM department INNER JOIN role ON (department.id = role.department_id) INNER JOIN employee ON (employee.role_id = role.id)';
-      query += 'WHERE department.name = ?'
-      inquirer.prompt([
-        {
-          name: 'department',
-          type: 'list',
-          choices() {
-            const choiceArray = []
-            results.forEach(({ name }) => {
-              choiceArray.push(name);
-            });
-            return choiceArray;
-        
-            },
-          message: 'Which department would you like to view?'
-        }
-      ])
+        let query = 'SELECT department.name, role.title, employee.first_name, employee.last_name ';
+        query += 'FROM department INNER JOIN role ON (department.id = role.department_id) INNER JOIN employee ON (employee.role_id = role.id)';
+        query += 'WHERE department.name = ?'
+        inquirer.prompt([
+          {
+            name: 'department',
+            type: 'list',
+            choices() {
+              const choiceArray = []
+              results.forEach(({ name }) => {
+                choiceArray.push(name);
+              });
+              return choiceArray;
 
-        .then((results) => {
-          connection.query(query, [results.department], (err, res) => {
-            console.log('Printing table to console')
-            console.table(res)
-            // res.forEach(({ first_name, last_name, role, department }) => {
-            //   console.log(`Department: ${department} || Role: ${role} || Full Name: ${first_name} ${last_name}`)
-            // })
-            dataBaseQuestion();
-          })
-        }
-        )
+            },
+            message: 'Which department would you like to view?'
+          }
+        ])
+
+          .then((results) => {
+            connection.query(query, [results.department], (err, res) => {
+              console.log('Printing table to console')
+              console.table(res)
+              // res.forEach(({ first_name, last_name, role, department }) => {
+              //   console.log(`Department: ${department} || Role: ${role} || Full Name: ${first_name} ${last_name}`)
+              // })
+              dataBaseQuestion();
+            })
+          }
+          )
       })
       break;
     case 'View all employees by manager':
@@ -120,54 +120,54 @@ const taskOperation = (data) => {
     case 'Add Employee':
       connection.query('SELECT * FROM role', (err, results) => {
         if (err) throw err;
-      inquirer.prompt([
-        {
-          name: 'firstName',
-          type: 'input',
-          message: 'What is the employees first name?'
-        },
-        {
-          name: 'lastName',
-          type: 'input',
-          message: 'What is the employees last name?'
-        },
-        //placeholder for role logic and database query
-        {
-          name: 'role',
-          type: 'list',
-          choices() {
-            const choiceArray = [];
-            results.forEach(({ id, title }) => {
-              choiceArray.push(`${id} ${title}`);
-            });
-            return choiceArray;
+        inquirer.prompt([
+          {
+            name: 'firstName',
+            type: 'input',
+            message: 'What is the employees first name?'
           },
-          message: 'What is the employees role ID?'
-        },
-        //placeholder for manager logic and database query
-        {
-          name: 'managerId',
-          type: 'input',
-          message: 'What is the employees managers ID?'
-        }
-      ])
-        .then((data) => {
-          const roleArr = data.role.split(' ')
-
-          connection.query('INSERT INTO employee SET ?',
-            {
-              first_name: data.firstName,
-              last_name: data.lastName,
-              role_id: roleArr[0],
-              manager_id: data.managerId
+          {
+            name: 'lastName',
+            type: 'input',
+            message: 'What is the employees last name?'
+          },
+          //placeholder for role logic and database query
+          {
+            name: 'role',
+            type: 'list',
+            choices() {
+              const choiceArray = [];
+              results.forEach(({ id, title }) => {
+                choiceArray.push(`${id} ${title}`);
+              });
+              return choiceArray;
             },
-            (err, res) => {
-              if (err) throw err;
-              console.log(`${res.affectedRows} employee inserted!\n`);
-              // Call updateProduct AFTER the INSERT completes
-              dataBaseQuestion()
-            });
-        })
+            message: 'What is the employees role ID?'
+          },
+          //placeholder for manager logic and database query
+          {
+            name: 'managerId',
+            type: 'input',
+            message: 'What is the employees managers ID?'
+          }
+        ])
+          .then((data) => {
+            const roleArr = data.role.split(' ')
+
+            connection.query('INSERT INTO employee SET ?',
+              {
+                first_name: data.firstName,
+                last_name: data.lastName,
+                role_id: roleArr[0],
+                manager_id: data.managerId
+              },
+              (err, res) => {
+                if (err) throw err;
+                console.log(`${res.affectedRows} employee inserted!\n`);
+                // Call updateProduct AFTER the INSERT completes
+                dataBaseQuestion()
+              });
+          })
       })
       break;
 
@@ -176,65 +176,65 @@ const taskOperation = (data) => {
       query += 'FROM role INNER JOIN employee ON (employee.role_id = role.id)';
       connection.query(query, async (err, results) => {
         if (err) throw err;
-      //Going to ask the questions regarding the employee to change and the role to update to
+        //Going to ask the questions regarding the employee to change and the role to update to
         // const roles = await selectRoles()
         await selectRoles()
         console.log(roles)
-      inquirer
-        .prompt([
-          {
-            name: 'employee',
-            type: 'list',
-            choices() {
-              //Creates the choice array
-              const choiceArray = []
-              //pulls the employees from the employee table
+        inquirer
+          .prompt([
+            {
+              name: 'employee',
+              type: 'list',
+              choices() {
+                //Creates the choice array
+                const choiceArray = []
+                //pulls the employees from the employee table
                 //populates the employee information into the array
                 results.forEach(({ id, first_name, last_name }) => {
-                  choiceArray.push( `${id} ${first_name} ${last_name}`);
+                  choiceArray.push(`${id} ${first_name} ${last_name}`);
                 })
 
                 return choiceArray
-                
+
+              },
+              message: 'Which employee would you like to update?'
             },
-            message: 'Which employee would you like to update?'
-          },
-          {
-            name: 'newRole',
-            type: 'list',
-            choices() {
-              //Creates the choice array
-              const choiceArray = []
-              //pulls the roles from the role table
-    
+            {
+              name: 'newRole',
+              type: 'list',
+              choices() {
+                //Creates the choice array
+                const choiceArray = []
+                //pulls the roles from the role table
+
                 //populates the roles into the choice array
                 roles.forEach(({ id, title }) => {
                   choiceArray.push(`${id} ${title}`);
                 })
 
                 return choiceArray
+              },
+              message: 'Which role would you like to switch the employee to?'
             },
-            message: 'Which role would you like to switch the employee to?'
-          },
-        ])
+          ])
 
-        .then((data) => {
-          const employeeArr = data.employee.split(' ')
-          const roleArr = data.newRole.split(' ')
-          //going to update the employee role ID on the employee page
-          connection.query('UPDATE employee SET ? WHERE?',
+          .then((data) => {
+            const employeeArr = data.employee.split(' ')
+            const roleArr = data.newRole.split(' ')
+            //going to update the employee role ID on the employee page
+            connection.query('UPDATE employee SET ? WHERE?',
 
-            [
-              { role_id: roleArr[0]},
-              { id: employeeArr[0] }
-            ],
-            (error) => {
-              if (error) throw err;
-              console.log('Employees role updated successfully!');
-              dataBaseQuestion();
-            }
-          );
-        });
+              [
+                { role_id: roleArr[0] },
+                { id: employeeArr[0] }
+              ],
+              (error) => {
+                if (error) throw err;
+                console.log('Employees role updated successfully!');
+                dataBaseQuestion();
+              }
+            );
+          });
       })
       break;
 
@@ -275,35 +275,35 @@ const taskOperation = (data) => {
     case 'Remove a department':
       connection.query('SELECT * FROM department', (err, results) => {
         if (err) throw err;
-      inquirer.prompt([
-        {
-          name: 'department',
-          type: 'list',
-          choices() {
-            //Creates the choice array
-            const choiceArray = []
-            //pulls the departments from the department table
-            results.forEach(({ name }) => {
-              choiceArray.push(name);
-            });
-            return choiceArray;
-          },
-          message: 'Which department would you like to remove?'
-        }
-      ])
-        .then((results) => {
-          connection.query('DELETE FROM department WHERE ?',
-            {
-              name: results.department
+        inquirer.prompt([
+          {
+            name: 'department',
+            type: 'list',
+            choices() {
+              //Creates the choice array
+              const choiceArray = []
+              //pulls the departments from the department table
+              results.forEach(({ name }) => {
+                choiceArray.push(name);
+              });
+              return choiceArray;
             },
-            (err, res) => {
-              if (err) throw err;
-              console.log(`${res.affectedRows} department deleted!\n`);
-              // Call dataBaseQuestion AFTER the DELETE completes
-              dataBaseQuestion();
-            }
-          )
-        })
+            message: 'Which department would you like to remove?'
+          }
+        ])
+          .then((results) => {
+            connection.query('DELETE FROM department WHERE ?',
+              {
+                name: results.department
+              },
+              (err, res) => {
+                if (err) throw err;
+                console.log(`${res.affectedRows} department deleted!\n`);
+                // Call dataBaseQuestion AFTER the DELETE completes
+                dataBaseQuestion();
+              }
+            )
+          })
       })
       break;
 
@@ -351,39 +351,40 @@ const taskOperation = (data) => {
       break;
 
     case 'Remove a role':
-      inquirer.prompt([
-        {
-          name: 'role',
-          type: 'rawlist',
-          choices() {
-            //Creates the choice array
-            const choiceArray = []
-            //pulls the roles from the role table
-            selectRoles()
+      connection.query('SELECT * FROM role', (err, results) => {
+        if (err) throw err;
+        inquirer.prompt([
+          {
+            name: 'role',
+            type: 'list',
+            choices() {
+              //Creates the choice array
+              const choiceArray = []
+
               //populates the roles into the choice array
-              .then(results.forEach(({ title }) => {
+              results.forEach(({ title }) => {
                 choiceArray.push(title);
               })
-              )
-              return choiceArray
-          },
-          message: 'Which role would you like to remove?'
-        }
-      ])
-        .then((results) => {
-          connection.query('DELETE FROM role WHERE ?',
-            {
-              title: results.role
-            },
-            (err, res) => {
-              if (err) throw err;
-              console.log(`${res.affectedRows} role deleted!\n`);
-              // Call dataBaseQuestion AFTER the DELETE completes
-              dataBaseQuestion();
-            }
-          )
-        })
 
+              return choiceArray
+            },
+            message: 'Which role would you like to remove?'
+          }
+        ])
+          .then((results) => {
+            connection.query('DELETE FROM role WHERE ?',
+              {
+                title: results.role
+              },
+              (err, res) => {
+                if (err) throw err;
+                console.log(`${res.affectedRows} role deleted!\n`);
+                // Call dataBaseQuestion AFTER the DELETE completes
+                dataBaseQuestion();
+              }
+            )
+          })
+      })
       break;
     default:
       connection.end()

@@ -18,7 +18,7 @@
   1) Go to my github repo 
   2) Clone my repo down to your computer using your command line. 
   3) Run NPM Install to install any necessary dependencies into your directory. 
-  4) Load the Employeeschema into your SQL management platform (This should also seed some starting data into your database) 
+  4) Load the Employeeschema.sql into your SQL management platform (This should also seed some starting data into your database) 
   5) Create a .env file using the template provided. You will need a username and a password. 
   6) Use node employeedirectory.js to run the application.
 
@@ -39,6 +39,22 @@
   * Remove role: This will allow you to remove a role
 
   Once you are finished updating records you can choose exit application to end the application.
+
+  ## Video
+
+  [Employee_Directory_Video](https://drive.google.com/file/d/1EY4K9rH-gfOBqGFaqfG03tIL6LsgSTeM/view)
+
+  ## Images
+  Here are a a few images of some of the available functionality, view the video for the full demo
+
+  ![title](./demo/titlescreen.PNG)
+
+  ![employee_table](./demo/employeetable.PNG)
+
+  ![add_employee](./demo/employeeadd.PNG)
+
+  ![actions](./demo/actionchoices.PNG)
+
 
   ## License
 

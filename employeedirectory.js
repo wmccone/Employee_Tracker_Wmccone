@@ -7,29 +7,16 @@ const figlet = require('figlet');
 //Creates the connection to the database
 const connection = mysql.createConnection({
   host: 'localhost',
-
   // Your port; if not 3306
   port: 3306,
-
   // Your username should be pulling from your .env file
   user: process.env.DB_USER,
-
   // Your password should be pulling from your .env file
   password: process.env.DB_PASSWORD,
   // the database name should already be prepopulated in the .env file if you used the template attached
   database: process.env.DB_NAME,
 });
 
-const selectEmployees = () => {
-  return connection.query('SELECT id, first_name, last_name FROM employee', (err, res) => {
-    if (err) {
-      console.log(err)
-    }
-    else {
-      return res
-    }
-  })
-};
 
 //This is going to create a global roles variable that the select roles function will push to
 let roles;
@@ -45,32 +32,6 @@ const selectRoles = () => {
     }
   })
 };
-
-const selectDepartment = () => {
-  const choiceArray = [];
-  connection.query('SELECT * FROM department', (err, res) => {
-    if (err) {
-      console.log(err)
-    }
-    else {
-      console.log(res)
-      // // for(let i=0;i<res.length;i++){
-      // //   choiceArray.push(res.name.toString());
-      // // }
-
-      res.forEach(({ name }) => {
-        choiceArray.push(name);
-      })
-      // return res
-    }
-  })
-  return choiceArray
-};
-
-
-
-
-
 
 //Going to take the Users input and apply an action depending on what they select
 const taskOperation = (data) => {
@@ -167,7 +128,7 @@ const taskOperation = (data) => {
               });
               return choiceArray;
             },
-            message: 'What is the employees role ID?'
+            message: 'What is the employees role?'
           }
 
         ])
@@ -489,7 +450,7 @@ const taskOperation = (data) => {
 const dataBaseQuestion = () => {
 
   // console.clear()
-  console.log('Welcome to the Employee Directory')
+  console.log('Employee Directory Options')
   inquirer.
   prompt([
     {
@@ -528,7 +489,9 @@ connection.connect((err) => {
           console.dir(err);
           return;
       }
+      console.clear()
       console.log(data)
+      console.log('Welcome to the Employee Directory, press the up or down arrow key to begin')
     });
   dataBaseQuestion();
 });
